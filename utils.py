@@ -1,4 +1,5 @@
 
+from typing import List, Tuple
 from docx.text.paragraph import Paragraph
 from docx.document import Document
 from docx.table import _Cell, Table
@@ -34,21 +35,34 @@ def get_nested_attr(obj, attr_path):
     return obj
 
 
-def extract_styles(block):
-    styles = []
-    for run in block.runs:
-        text = run.text
-        if not text.strip():
-            continue
-        STYLES_TO_CHECK = {
-            "Bold": run.bold,
-            "Italic": run.italic,
-            "Underline": run.underline,
-            "Color": run.font.color.rgb if run.font.color and run.font.color.rgb else RGBColor(0, 0, 0),
-            "Size": run.font.size
-        }
-        styles.append((text, STYLES_TO_CHECK))
-    return styles
+def extract_styles(paragraph):
+    merged_runs = []
+    last_style = None
+    current_text = ""
+    
+    if paragraph:
+        for run in paragraph.runs:
+            style = {
+                "bold": run.bold,
+                "italic": run.italic,
+                "underline": run.underline,
+                "color": run.font.color.rgb if run.font.color else None,
+                "size": run.font.size
+            }
+
+            if style == last_style:
+                current_text += run.text
+            else:
+                if current_text:
+                    merged_runs.append((current_text, last_style))
+                current_text = run.text
+                last_style = style
+
+        if current_text:
+            merged_runs.append((current_text, last_style))
+
+    return merged_runs
+
 
 
 def manage_space(prev_text, next_text):
@@ -59,3 +73,45 @@ def manage_space(prev_text, next_text):
     if not prev_text.endswith(" ") and not next_text.startswith((" ", ".")):
         return prev_text + " " + next_text
     return prev_text + next_text
+
+
+def identify_changes(old: List[Tuple], new: List[Tuple]) -> Tuple[List, List, List, List]:
+    matched = []
+    changed = []
+    added = []
+    deleted = []
+
+    used_new_indices = set()
+    used_old_indices = set()
+
+    for i, old_item in enumerate(old):
+        for j, new_item in enumerate(new):
+            if j in used_new_indices:
+                continue
+            if old_item == new_item:
+                matched.append(old_item)
+                used_new_indices.add(j)
+                used_old_indices.add(i)
+                break
+
+    for i, old_item in enumerate(old):
+        if i in used_old_indices:
+            continue
+        for j, new_item in enumerate(new):
+            if j in used_new_indices:
+                continue
+            if old_item[0] == new_item[0]:
+                changed.append((old_item, new_item))
+                used_new_indices.add(j)
+                used_old_indices.add(i)
+                break
+
+    for i, old_item in enumerate(old):
+        if i not in used_old_indices:
+            deleted.append(old_item)
+            
+    for j, new_item in enumerate(new):
+        if j not in used_new_indices:
+            added.append(new_item)
+
+    return matched, changed, added, deleted
