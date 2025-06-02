@@ -6,6 +6,8 @@ from docx.table import _Cell, Table
 from docx.oxml.text.paragraph import CT_P
 from docx.oxml.table import CT_Tbl
 from docx.shared import RGBColor
+from difflib import SequenceMatcher
+from itertools import zip_longest
 
 
 def iter_block_items(parent):
@@ -109,9 +111,25 @@ def identify_changes(old: List[Tuple], new: List[Tuple]) -> Tuple[List, List, Li
     for i, old_item in enumerate(old):
         if i not in used_old_indices:
             deleted.append(old_item)
-            
+
     for j, new_item in enumerate(new):
         if j not in used_new_indices:
             added.append(new_item)
 
     return matched, changed, added, deleted
+
+
+def align_blocks(old_blocks, new_blocks):
+    old_texts = [blk.text.strip() for blk in old_blocks]
+    new_texts = [blk.text.strip() for blk in new_blocks]
+
+    matcher = SequenceMatcher(None, old_texts, new_texts)
+    aligned_pairs = []
+
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        for old_i, new_i in zip_longest(range(i1, i2), range(j1, j2)):
+            old_blk = old_blocks[old_i] if old_i is not None and old_i < len(old_blocks) else None
+            new_blk = new_blocks[new_i] if new_i is not None and new_i < len(new_blocks) else None
+            aligned_pairs.append((old_blk, new_blk))
+
+    return aligned_pairs
