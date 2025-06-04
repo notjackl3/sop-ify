@@ -133,3 +133,10 @@ def align_blocks(old_blocks, new_blocks):
             aligned_pairs.append((old_blk, new_blk))
 
     return aligned_pairs
+
+
+def split_and_style(text, style):
+    if not text:
+        return []
+    sections = [x for x in text.split(" ") if x]
+    return [(x, {k: v for k, v in style.items() if v}) for x in sections]

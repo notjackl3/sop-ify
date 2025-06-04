@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Comparison Result</title>
+</head>
+<body>
+    <h2>Changes Detected</h2>
+    <ul>
+        {% for change in changes %}
+        <li>{{ change }}</li>
+        {% endfor %}
+    </ul>
+    <br>
+    <a href="/">Compare Again</a>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Compare DOCX Files</title>
+</head>
+<body>
+    <h2>Upload DOCX Files to Compare</h2>
+    <form action="/compare" method="post" enctype="multipart/form-data">
+        <label>Original Document:</label><br>
+        <input type="file" name="file1"><br><br>
+        <label>Edited Document:</label><br>
+        <input type="file" name="file2"><br><br>
+        <button type="submit">Compare</button>
+    </form>
+</body>
+</html>

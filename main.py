@@ -1,11 +1,7 @@
 from docx import Document
-from docx.shared import Cm
-from utils import iter_block_items,extract_styles, align_blocks, identify_changes
-from section import Section
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-import difflib
+from utils import iter_block_items,extract_styles, align_blocks, identify_changes, split_and_style
 from itertools import zip_longest
-import time
+import difflib
 
 
 # name, attribute
@@ -17,30 +13,33 @@ ATTRIBUTES_TO_CHECK = [
     ("font size", "font.size")
 ]
 
-while True:
-    print("⦿⦿⦿⦿⦿⦿⦿ Refreshing ⦿⦿⦿⦿⦿⦿⦿\n")
-    document = Document()
-    old_document = Document("documents/How to Organise Weekly Knowledge Sharing Sessions.docx")
-    new_document = Document("documents/How to Organise Weekly Knowledge Sharing Sessions copy.docx")
 
+def compare_documents(old_document_path: str, new_document_path: str):
+    print("⦿⦿⦿⦿⦿⦿⦿ Refreshing ⦿⦿⦿⦿⦿⦿⦿\n")
+    old_document = Document(old_document_path)
+    new_document = Document(new_document_path)
     old_content = [para.text for para in old_document.paragraphs if para.text != ""]
     new_content = [para.text for para in new_document.paragraphs if para.text != ""]
-
-    changes = []
-    
     diff = difflib.unified_diff(old_content, new_content)
-    prev = ""
+    
+    changes = []
+    removed = []
     for line in diff:
+        filtered_line = line[1:].lstrip('+-').rstrip('.')
         if line.startswith('-') and not line.startswith('---'):
-            changes.append(f"🔴 Removed: {line[1:].strip()}")
+            removed.append(filtered_line)
+            changes.append(f"🔴 Removed: {filtered_line}")
         elif line.startswith('+') and not line.startswith('+++'):
-            if prev and prev in line:
-                changes[-1] = f"🔵 From: {prev}\n🔵 Updated to: {line[1:].strip()}"
-            else:
-                changes.append(f"🟢 Added: {line[1:].strip()}")
-        prev = line[1:].strip()
+            found = False
+            for removed_line in removed:
+                if removed_line in filtered_line or filtered_line in removed_line:
+                    found = True
+                    removed.remove(removed_line)
+                    changes.append(f"🔵 From: {removed_line}\n🔵 Updated to: {filtered_line}")
+                    changes.remove(f"🔴 Removed: {removed_line}")
+            if not found:
+                changes.append(f"🟢 Added: {filtered_line}")
 
-    count = 0
     old_block_items = list(iter_block_items(old_document))
     new_block_items = list(iter_block_items(new_document))
     aligned_pairs = align_blocks(old_block_items, new_block_items)
@@ -48,24 +47,12 @@ while True:
     for idx, (old_block, new_block) in enumerate(aligned_pairs):
         old_styling = extract_styles(old_block)
         new_styling = extract_styles(new_block)   
-
-        style_changes = []
-
-        old_sections = []
-        new_sections = []
         old_words_styling = []
         new_words_styling = []
 
         for (old_text, old_style), (new_text, new_style) in zip_longest(old_styling, new_styling, fillvalue=(None, None)):
-            if old_text: 
-                temp_sections = [x for x in old_text.split(" ") if x != ""]
-                old_sections.extend(temp_sections)
-                old_words_styling.extend([(x, {y: old_style[y] for y in old_style if old_style[y]}) for x in temp_sections])
-
-            if new_text:
-                temp_sections = [x for x in new_text.split(" ") if x != ""]
-                new_sections.extend(temp_sections)
-                new_words_styling.extend([(x, {y: new_style[y] for y in new_style if new_style[y]}) for x in temp_sections])
+            old_words_styling.extend(split_and_style(old_text, old_style))
+            new_words_styling.extend(split_and_style(new_text, new_style))
 
         matched, changed, added, deleted = identify_changes(old_words_styling, new_words_styling)
         
@@ -96,15 +83,21 @@ while True:
                         changes.append(f"🟡 Removed [{attr}]: '{change[0][0]}'")
             
             for attr, change in temp_change.items():
-                changes.append(f"🟡 Changed [{attr[0]}]: '{" ".join([x[0] for x in change])}': {change[0][1]} to {attr[1]}")
+                new_attr = attr[0]
+                old_attr = attr[1]
+                attr_name = change[0][1]
+                changes.append(f"🟡 Changed [{old_attr}]: '{" ".join([x[0] for x in change])}': {attr_name} to {new_attr}")
 
             for attr, add in temp_add.items():
-                if attr[1] is True:
-                    changes.append(f"🟡 Added [{attr[0]}]: '{" ".join([x for x in add])}'")
+                new_attr = attr[0]
+                old_attr = attr[1]
+                attr_name = change[0][1]
+                if old_attr is True:
+                    changes.append(f"🟡 Added [{new_attr}]: '{" ".join([x for x in add])}'")
                 else:
-                    changes.append(f"🟡 Added [{attr[0]}]: '{" ".join([x for x in add])}': {attr[1]}")
+                    changes.append(f"🟡 Added [{new_attr}]: '{" ".join([x for x in add])}': {old_attr}")
 
     for change in changes:
         print(change, "\n")
 
-    time.sleep(10)
+    return changes
