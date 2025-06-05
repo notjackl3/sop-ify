@@ -1,16 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8" />
     <title>Compare DOCX Files</title>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles.css') }}">
 </head>
 <body>
-    <h2>Upload DOCX Files to Compare</h2>
-    <form action="/compare" method="post" enctype="multipart/form-data">
-        <label>Original Document:</label><br>
-        <input type="file" name="file1"><br><br>
-        <label>Edited Document:</label><br>
-        <input type="file" name="file2"><br><br>
-        <button type="submit">Compare</button>
-    </form>
+    <div class="main-container">
+        <h2>Upload DOCX Files to Compare</h2>
+        <div id="drop_zone1" class="drop_zone sub-container" ondrop="dropHandler(event, 'file1Input', 'drop_zone1');" ondragover="dragOverHandler(event);">
+            <p> Drag your original file here. </p>
+        </div>
+
+        <div id="drop_zone2" class="drop_zone sub-container" ondrop="dropHandler(event, 'file2Input', 'drop_zone2');" ondragover="dragOverHandler(event);">
+            <p> Drag your new file here. </p>
+        </div>
+
+        <form class="sub-container" action="/compare" method="post" enctype="multipart/form-data">
+            <input class="hidden" type="file" name="file1" id="file1Input" style="display: none;">
+            <input class="hidden" type="file" name="file2" id="file2Input" style="display: none;">
+            <button class="button sub-container" type="submit"> Compare </button>
+        </form>
+
+        <button class="button sub-container" type="button" onclick="resetFiles()"> Reset files </button>
+    </div>
+
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>
 </html>

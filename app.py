@@ -4,7 +4,7 @@ from main import compare_documents
 from docx import Document
 
 app = Flask(__name__)
-UPLOAD_FOLDER = 'documents'
+UPLOAD_FOLDER = 'media'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/')
@@ -15,6 +15,9 @@ def index():
 def compare():
     file1 = request.files['file1']
     file2 = request.files['file2']
+
+    print(file1)
+    print(file2)
 
     if not file1 or not file2:
         return "Please upload both documents", 400
@@ -29,3 +32,4 @@ def compare():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
