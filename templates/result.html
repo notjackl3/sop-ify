@@ -2,15 +2,57 @@
 <html>
 <head>
     <title>Comparison Result</title>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles-result.css') }}">
+
+    <script>
+        var prev_changes = []
+        async function fetchChanges() {
+            try {
+                const response = await fetch('/changes', {method: 'POST'});
+                if (response.ok) {
+                    const data = await response.json();
+                    const changes = data.latest_changes;
+                    console.log(prev_changes);
+                    console.log(changes);
+
+                    if (JSON.stringify(prev_changes) != JSON.stringify(changes)) {
+                        console.log("updated");
+                        const ul = document.getElementById('changes-list');
+                        ul.innerHTML = '';
+                        changes.forEach(change => {
+                            const li = document.createElement('li');
+                            li.className = 'item';
+                            li.textContent = change;  // or use innerHTML if change contains HTML
+                            ul.appendChild(li);
+                        })
+                        prev_changes = changes
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching changes:', error);
+            }
+        }
+
+        setInterval(fetchChanges, 3000);
+
+        fetchChanges();
+    </script>
 </head>
-<body>
-    <h2>Changes Detected</h2>
-    <ul>
-        {% for change in changes %}
-        <li>{{ change }}</li>
-        {% endfor %}
-    </ul>
-    <br>
-    <a href="/">Compare Again</a>
+<body class="main-container">
+    <div class="main-container">
+        <div class="sub-container title">
+            <h2> Changes detected </h2>
+        </div>
+
+        <!-- <ul class="sub-container item-list" style="list-style-type: none;">
+            {% for change in changes %}
+            <li class="item"> {{ change }} </li>
+            {% endfor %}
+        </ul> -->
+        <ul id="changes-list" class="sub-container item-list" style="list-style-type: none;">
+            <!-- JS will dynamically fill this -->
+          </ul>          
+        <a class="button sub-container" href="/" style="padding-left: 20px;">Compare Again</a>
+    </div>
 </body>
 </html>

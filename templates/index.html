@@ -7,13 +7,15 @@
 </head>
 <body>
     <div class="main-container">
-        <h2>Upload DOCX Files to Compare</h2>
+        <h2> Compare Word docx files </h2>
         <div id="drop_zone1" class="drop_zone sub-container" ondrop="dropHandler(event, 'file1Input', 'drop_zone1');" ondragover="dragOverHandler(event);">
             <p> Drag your original file here. </p>
+            <a onclick="addFile(event, 'file1Input', 'drop_zone1')"> Upload instead. </a>
         </div>
 
         <div id="drop_zone2" class="drop_zone sub-container" ondrop="dropHandler(event, 'file2Input', 'drop_zone2');" ondragover="dragOverHandler(event);">
             <p> Drag your new file here. </p>
+            <a onclick="addFile(event, 'file2Input', 'drop_zone2')"> Upload instead. </a>
         </div>
 
         <form class="sub-container" action="/compare" method="post" enctype="multipart/form-data">

@@ -1,35 +1,61 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, jsonify
 import os
 from main import compare_documents
-from docx import Document
+import threading, time, os, webbrowser
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'media'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+latest_changes = []
+
+def scan_files():
+    file1 = os.path.join(UPLOAD_FOLDER, 'file1.docx')
+    file2 = os.path.join(UPLOAD_FOLDER, 'file2.docx')
+    if os.path.exists(file1) and os.path.exists(file2):
+        global latest_changes
+        latest_changes = compare_documents(file1, file2)
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+@app.route('/changes', methods=['POST'])
+def changes():
+    scan_files()
+    return jsonify({"latest_changes": latest_changes})
+
 @app.route('/compare', methods=['POST'])
 def compare():
-    file1 = request.files['file1']
-    file2 = request.files['file2']
+    return render_template('result.html')
 
-    print(file1)
-    print(file2)
+def watch_files():
+    class ChangeHandler(FileSystemEventHandler):
+        def on_modified(self, event):
+            if event.src_path.endswith('.docx'):
+                scan_files()
 
-    if not file1 or not file2:
-        return "Please upload both documents", 400
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER)
 
-    path1 = os.path.join(app.config['UPLOAD_FOLDER'], 'file1.docx')
-    path2 = os.path.join(app.config['UPLOAD_FOLDER'], 'file2.docx')
-    file1.save(path1)
-    file2.save(path2)
+    event_handler = ChangeHandler()
+    observer = Observer()
+    observer.schedule(event_handler, UPLOAD_FOLDER, recursive=False)
+    observer.start()
 
-    changes = compare_documents(path1, path2)
-    return render_template('result.html', changes=changes)
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
+
+def open_browser():
+    time.sleep(1)
+    webbrowser.open('http://127.0.0.1:5000')
 
 if __name__ == '__main__':
-    app.run(debug=True)
-
+    threading.Thread(target=watch_files, daemon=True).start()
+    threading.Thread(target=open_browser).start()
+    app.run(host='127.0.0.1', port=5000, debug=False, use_reloader=False)

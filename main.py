@@ -104,10 +104,10 @@ def compare_documents(old_document_path: str, new_document_path: str):
             
             # update the attribute changes
             for attr, change in temp_change.items():
-                new_attr = attr[0]
-                old_attr = attr[1]
-                attr_name = change[0][1]
-                changes.append(f"🟡 Changed [{old_attr}]: '{" ".join([x[0] for x in change])}': {attr_name} to {new_attr}")
+                new_attr = attr[1]
+                old_attr = change[0][1]
+                attr_name = attr[0]
+                changes.append(f"🟡 Changed [{attr_name}]: '{" ".join([x[0] for x in change])}': {old_attr} to {new_attr}")
 
             # update the new attributes
             for attr, add in temp_add.items():
@@ -119,8 +119,8 @@ def compare_documents(old_document_path: str, new_document_path: str):
                 else:
                     changes.append(f"🟡 Added [{new_attr}]: '{" ".join([x for x in add])}': {old_attr}")
 
-    for change in changes:
-        print(change, "\n")
+    # for change in changes:
+    #     print(change, "\n")
 
     return changes
 

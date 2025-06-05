@@ -13,6 +13,20 @@ body {
     justify-content: center;
 }
 
+p {
+    text-align: center;
+
+    margin: 1em;
+    margin-bottom: 0;
+}
+
+a {
+    cursor: pointer;
+    text-align: center;
+
+    color:grey;
+}
+
 .main-container {
     display: flex;
     flex-direction: column;
@@ -32,10 +46,20 @@ body {
 }
 
 .button {
-    border-width: 0;
+    cursor: pointer;
+
     padding: 0.5rem 0;
     margin: 0.2rem 0;
+
+    border-width: 0;
     background-color: whitesmoke;
+}
+
+.button:hover {
+    padding: 0.7rem;
+
+    color: white;
+    background-color: silver;
 }
 
 .drop_zone {
