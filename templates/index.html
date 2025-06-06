@@ -8,14 +8,14 @@
 <body>
     <div class="main-container">
         <h2> Compare Word docx files </h2>
-        <div id="drop_zone1" class="drop_zone sub-container" ondrop="dropHandler(event, 'file1Input', 'drop_zone1');" ondragover="dragOverHandler(event);">
-            <p> Drag your original file here. </p>
-            <a onclick="addFile(event, 'file1Input', 'drop_zone1')"> Upload instead. </a>
+        <div id="drop_zone1" class="drop_zone sub-container" ondrop="dropHandler(event, 'file1Input', 'drop_zone1', 'text1', 'upload1');" ondragover="dragOverHandler(event);">
+            <p id="text1"> Drag your original file here. </p>
+            <a id="upload1" onclick="addFile(event, 'file1Input', 'drop_zone1', 'text1', 'upload1')"> Upload instead. </a>
         </div>
 
-        <div id="drop_zone2" class="drop_zone sub-container" ondrop="dropHandler(event, 'file2Input', 'drop_zone2');" ondragover="dragOverHandler(event);">
-            <p> Drag your new file here. </p>
-            <a onclick="addFile(event, 'file2Input', 'drop_zone2')"> Upload instead. </a>
+        <div id="drop_zone2" class="drop_zone sub-container" ondrop="dropHandler(event, 'file2Input', 'drop_zone2', 'text2', 'upload2');" ondragover="dragOverHandler(event);">
+            <p id="text2"> Drag your new file here. </p>
+            <a id="upload2" onclick="addFile(event, 'file2Input', 'drop_zone2', 'text2', 'upload2')"> Upload instead. </a>
         </div>
 
         <form class="sub-container" action="/compare" method="post" enctype="multipart/form-data">

@@ -43,16 +43,9 @@
         <div class="sub-container title">
             <h2> Changes detected </h2>
         </div>
-
-        <!-- <ul class="sub-container item-list" style="list-style-type: none;">
-            {% for change in changes %}
-            <li class="item"> {{ change }} </li>
-            {% endfor %}
-        </ul> -->
-        <ul id="changes-list" class="sub-container item-list" style="list-style-type: none;">
-            <!-- JS will dynamically fill this -->
-          </ul>          
+        <ul id="changes-list" class="sub-container item-list" style="list-style-type: none;"></ul>          
         <a class="button sub-container" href="/" style="padding-left: 20px;">Compare Again</a>
+        <p class="sub-container"> Please open the file at {{ file_path}} </p>
     </div>
 </body>
 </html>
